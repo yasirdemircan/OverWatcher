@@ -1,0 +1,19 @@
+{
+  "name": "overwatcher",
+  "version": "1.0.0",
+  "description": "Notify website changes",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "Yasir Demircan",
+  "license": "ISC",
+  "dependencies": {
+    "http": "^0.0.0",
+    "node-cron": "^2.0.3",
+    "nodemailer": "^6.3.1",
+    "request": "^2.88.0"
+  },
+  "devDependencies": {}
+}
