@@ -3,10 +3,13 @@ const fs = require('fs');
 var nodemailer = require('nodemailer');
 var cron = require('node-cron');
 //Function for checking news
-var oldnews; 
+var oldnews;
+var email = "test@test.com" //Sender email for notification
+var pass = "test" // Sender email pass
+var recipients = "1@test.com,2@test.com,3@test.com" //Recipients for notification
 
 cron.schedule('00 00 * * *', () => {
-  //send4Cron();
+    //send4Cron();
 });
 
 async function checkNews(param1) {
@@ -20,7 +23,7 @@ async function checkNews(param1) {
         timeout: 30000
     });
     const context = browser.defaultBrowserContext();
-    // URL An array of permissions
+
     context.overridePermissions("https://www.istanbul.edu.tr/tr/haberler/1", ["geolocation", "notifications"]);
     await haberpage.waitForSelector("[xref='newsdetail']", {
         timeout: 30000
@@ -37,27 +40,27 @@ async function checkNews(param1) {
             return list[0].innerText
         }
 
-    },oldnews);
-    
-    //console.log(fs.readFileSync('oldnews.txt', 'utf8'));
+    }, oldnews);
+
+
     if (haber == 0) {
         console.log("No new news");
         await browser.close();
     } else {
         var newoldnews = haber.replace(/[^a-z0-9]/gi, '');
         console.log("New posts found sending emails");
-        //console.log(newoldnews+"!!!fromnewold")
-        fs.writeFile('oldnews.txt',newoldnews, function (err) {
-  if (err) throw err;
-  console.log('Old news got updated!!');
-    sendMail("Haber",haber)
 
-});
-          
-       
+        fs.writeFile('oldnews.txt', newoldnews, function (err) {
+            if (err) throw err;
+            console.log('Old news got updated!!');
+            sendMail("Haber", haber)
+
+        });
+
+
     }
 
-await browser.close();
+    await browser.close();
 }
 async function checkNotices(param1) {
     const browser = await puppeteer.launch({
@@ -70,7 +73,6 @@ async function checkNotices(param1) {
         timeout: 30000
     });
     const context = browser.defaultBrowserContext();
-    // URL An array of permissions
     context.overridePermissions("https://www.istanbul.edu.tr/tr/duyurular/1", ["geolocation", "notifications"]);
     await duyurupage.waitForSelector("[xref='noticedetail']", {
         timeout: 30000
@@ -87,44 +89,43 @@ async function checkNotices(param1) {
             return list[0].innerText
         }
 
-    },oldnotices);
-    
-    //console.log(fs.readFileSync('oldnews.txt', 'utf8'));
+    }, oldnotices);
+
+
     if (duyuru == 0) {
         console.log("No new notices");
         await browser.close();
     } else {
         var newoldnotices = duyuru.replace(/[^a-z0-9]/gi, '');
         console.log("New posts found sending emails");
-        //console.log(newoldnews+"!!!fromnewold")
-        fs.writeFile('oldnotices.txt',newoldnotices, function (err) {
-  if (err) throw err;
-  console.log('Old notices got updated!!');
-    sendMail("Duyuru",duyuru);
+        fs.writeFile('oldnotices.txt', newoldnotices, function (err) {
+            if (err) throw err;
+            console.log('Old notices got updated!!');
+            sendMail("Duyuru", duyuru);
 
-});
-          
-       
+        });
+
+
     }
 
-await browser.close();
+    await browser.close();
 }
 
 
-function sendMail(type,content) {
+function sendMail(type, content) {
     var transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: 'sosyalmedyahaberduyuru@gmail.com',
-            pass: 'sosyalmedya520.'
+            user: email,
+            pass: pass
         }
     });
 
     var mailOptions = {
-        from: 'sosyalmedyahaberduyuru@gmail.com',
-        to: 'yasirdemircan@gmail.com,kandemirseda@gmail.com,yunusemreokmen@gmail.com',
-        subject: 'Yeni '+type+' !',
-        text: content +" başlıklı "+ type.toLowerCase()+ " istanbul.edu.tr'ye eklendi"
+        from: email,
+        to: recipients,
+        subject: 'Yeni ' + type + ' !',
+        text: content + " başlıklı " + type.toLowerCase() + " istanbul.edu.tr'ye eklendi"
     };
 
     transporter.sendMail(mailOptions, function (error, info) {
@@ -135,20 +136,21 @@ function sendMail(type,content) {
         }
     });
 }
+//Send test mail to yourself for crontest
 function send4Cron() {
     var transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: 'sosyalmedyahaberduyuru@gmail.com',
-            pass: 'sosyalmedya520.'
+            user: email,
+            pass: pass
         }
     });
 
     var mailOptions = {
-        from: 'sosyalmedyahaberduyuru@gmail.com',
-        to: 'yasirdemircan@gmail.com',
+        from: email,
+        to: email,
         subject: 'Wake up!',
-        text:"It's 00:00"
+        text: "It's 00:00"
     };
 
     transporter.sendMail(mailOptions, function (error, info) {
@@ -160,13 +162,8 @@ function send4Cron() {
     });
 }
 
-setInterval(function(){
-  checkNews().then(function(){checkNotices();});    
-},30000);
-
-
-
-
-
-
-
+setInterval(function () {
+    checkNews().then(function () {
+        checkNotices();
+    });
+}, 30000);
